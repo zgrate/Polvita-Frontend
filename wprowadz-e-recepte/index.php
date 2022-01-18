@@ -1,4 +1,4 @@
-<?php require_once('header.php'); ?>
+<?php require_once('../fragments/header.php'); ?>
 
 
     <form name="erecepta" action="#" onsubmit="return submit_erecepte();">
@@ -15,7 +15,7 @@
                                maxlength="11" name="pesel"/>
 
                     </div>
-                    <?php include_once("fragments/koszyk_fragment.php"); ?>
+                    <?php include_once("../fragments/koszyk_fragment.php"); ?>
                 </div>
                 <div class="row">
                     <input id="cancel" type="reset" class="btn btn-danger col-4 my-3 me-auto">
@@ -110,4 +110,4 @@
         })
 
     </script>
-<?php require_once("footer.php"); ?>
+<?php require_once("../fragments/footer.php"); ?>

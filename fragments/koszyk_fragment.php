@@ -38,6 +38,9 @@
             $.ajax(ip_address + "/get_basket/" + user_id).done(function (data) {
                 window.basket = data["basket"]
                 refresh_basket(data["basket"])
+            }).fail(function () {
+                $("#errorModalText").text("Wystąpił błąd połączenia!")
+                $("#errorModal").modal("show")
             })
         }
     )

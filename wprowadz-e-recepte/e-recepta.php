@@ -1,4 +1,4 @@
-<?php require_once('header.php'); ?>
+<?php require_once('../fragments/header.php'); ?>
 
     <div class="container">
         <main class="align-self-center mx-auto">
@@ -8,7 +8,7 @@
                     <ul id="receipt" class="row list-group mx-auto">
                     </ul>
                 </div>
-                <?php include_once("fragments/koszyk_fragment.php") ?>
+                <?php include_once("../fragments/koszyk_fragment.php") ?>
             </div>
             <div class="row">
                 <button id="cancel" class="btn btn-danger col-4 my-3 me-auto" onclick="return go_back();">Wróć</button>
@@ -92,7 +92,7 @@
         }
 
         function go_back() {
-            window.location.href = "wprowadz-e-recepte.php"
+            window.location.href = "index.php"
         }
 
         $(function () {
@@ -114,7 +114,7 @@
                         let entry = data["articles"][item]
                         window.receipt.push({'article': entry, 'amount': erecepta["erecepta"][parseInt(entry["IdT"])]})
                         let lili = document.createElement("li")
-                        let price = formatter.format(entry["Cena"])
+                        let price = currencyFormatter.format(entry["Cena"])
                         console.log(erecepta["erecepta"][parseInt(entry["IdT"])])
                         lili.className = "list-group-item  border-primary border-top"
                         lili.id = `item_${entry["IdT"]}`
@@ -132,4 +132,4 @@
 
 
     </script>
-<?php require_once("footer.php"); ?>
+<?php require_once("../fragments/footer.php"); ?>

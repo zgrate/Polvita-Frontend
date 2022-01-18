@@ -11,7 +11,6 @@
             </div>
             <div id="errorModalText" class="modal-body">
             </div>
-
         </div>
     </div>
 </div>
