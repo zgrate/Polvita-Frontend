@@ -14,13 +14,18 @@
                 <div class="modal-body">
                     <form>
                         <div class="row mx-auto">
-                            <input class="form-check" id="cardNr" placeholder="Numer karty">
+                            <input class="form-check border" id="cardNr" placeholder="Numer karty">
                         </div>
                         <div class="row mx-auto">
-                            <input class="me-2  col form-check" id="expirationDate" placeholder="MM/YY" maxlength="5">
-                            <input class="ms-2 col form-check" id="cvv" placeholder="CVV" maxlength="4">
+                            <input class="me-2 col form-check border" id="expirationDate" placeholder="MM/YY"
+                                   maxlength="5">
+                            <input class="ms-2 col form-check border" id="cvv" placeholder="CVV" maxlength="3">
                         </div>
-                        <input class="mx-auto btn btn-primary" value="dodaj">
+                        <div class="text-center my-2">
+                            <input class="mx-auto btn btn-primary" value="Dodaj" onclick="return add_card_btn()">
+                            <input class="mx-auto btn btn-danger" value="Anuluj"
+                                   onclick="$('#addCardModal').modal('hide')">
+                        </div>
                     </form>
                 </div>
             </div>
@@ -82,35 +87,131 @@
             $('#addCardModal').modal("show")
         }
 
+        function add_card_btn() {
+            const cardNrObj = $("#cardNr")
+            const mmyyObj = $("#expirationDate")
+            const cvvObj = $("#cvv")
+
+            const mmddRegex = new RegExp("[0-9][0-9]/[0-9][0-9]");
+            const cvvRegex = new RegExp("[0-9][0-9][0-9]");
+            let valid = true
+
+            if (!validateCardNumber(cardNrObj.val())) {
+                cardNrObj.addClass("border-danger")
+                valid = false
+            } else {
+                cardNrObj.removeClass("border-danger")
+            }
+
+            if (!mmddRegex.test(mmyyObj.val())) {
+                mmyyObj.addClass("border-danger")
+                valid = false
+
+            } else {
+                mmyyObj.remove("border-danger")
+            }
+
+            if (!cvvRegex.test(cvvObj.val())) {
+                valid = false
+                cvvObj.addClass("border-danger")
+            } else {
+                cvvObj.removeClass("border-danger")
+            }
+            if (valid) {
+                window.payment_method = {
+                    'type': 'card',
+                    'four-digits': cardNrObj.val().slice(-4),
+                    'card': {
+                        'number': cardNrObj.val(),
+                        'expiration': mmyyObj.val(),
+                        'cvv': cvvObj.val()
+                    },
+                    'id': Math.floor(Math.random() * 200)
+                }
+                window.payments.push(window.payment_method)
+                refreshPayments()
+                $('#item_' + window.payment_method["id"]).click()
+                $('#addCardModal').modal('hide')
+            }
+        }
+
+        function refreshPayments() {
+            $("#cards")[0].innerHTML = ""
+            let first = true
+            for (let key in window.payments) {
+                const entry = window.payments[key]
+                let liel = document.createElement("li")
+                let name = entry["name"]
+                if (entry["type"] === "card") {
+                    name = "Karta o ostatnich cyfrach " + entry["four-digits"]
+                }
+                let checked = ""
+                if (first) {
+                    checked = "checked"
+                    first = false
+                }
+
+                liel.className = "list-group-item border-primary border-top"
+                liel.innerHTML = `<input id="item_${entry['id']}" name="delivery_form" class="form-check-input" type="radio" onclick="return selected(${entry['id']});" value="" ${checked}>
+                                            <label for="item_${entry['id']}" class="form-check-label" >${name}</label>`
+                $("#cards").append(liel)
+            }
+        }
+
         $(function () {
-            window.delivery = JSON.parse(Cookies.get("delivery"))
+            window.delivery_method = JSON.parse(Cookies.get("delivery_method"))
             $("#basket").text("Koszyk: " + currencyFormatter.format(Cookies.get("basket_sum")))
-            $("#delivery_sum").text("Dostawa: " + currencyFormatter.format(window.delivery["price"]))
-            $("#sum").text("RAZEM: " + currencyFormatter.format(window.delivery["price"] + parseInt(Cookies.get("basket_sum"))))
+            $("#delivery_sum").text("Dostawa: " + currencyFormatter.format(window.delivery_method["price"]))
+            $("#sum").text("RAZEM: " + currencyFormatter.format(window.delivery_method["price"] + parseInt(Cookies.get("basket_sum"))))
             $.ajax(ip_address + "/payments/" + user_id).done(function (data) {
                 window.payments = data["payments"]
-
-                let first = true
-                for (let key in data["payments"]) {
-                    const entry = data['payments'][key]
-                    let liel = document.createElement("li")
-                    let name = entry["name"]
-                    if (entry["type"] === "card") {
-                        name = "Karta o ostatnich cyfrach " + entry["four-digits"]
-                    }
-                    let checked = ""
-                    if (first) {
-                        checked = "checked"
-                        first = false
-                    }
-
-                    liel.className = "list-group-item border-primary border-top"
-                    liel.innerHTML = `<input id="item_${entry['id']}" name="delivery_form" class="form-check-input" type="radio" onclick="return selected(${entry['id']});" value="" ${checked}>
-                                    <label for="item_${entry['id']}" class="form-check-label" >${name}</label>`
-                    $("#cards").append(liel)
-                }
+                refreshPayments()
                 selected(window.payments[0]["id"])
             })
         })
+
+
+        const validateCardNumber = number => {
+            //Check if the number contains only numeric value
+            //and is of between 13 to 19 digits
+            const regex = new RegExp("^[0-9]{13,19}$");
+            if (!regex.test(number)) {
+                return false;
+            }
+
+            return luhnCheck(number);
+        }
+
+        const luhnCheck = val => {
+            let checksum = 0; // running checksum total
+            let j = 1; // takes value of 1 or 2
+
+            // Process each digit one by one starting from the last
+            for (let i = val.length - 1; i >= 0; i--) {
+                let calc = 0;
+                // Extract the next digit and multiply by 1 or 2 on alternative digits.
+                calc = Number(val.charAt(i)) * j;
+
+                // If the result is in two digits add 1 to the checksum total
+                if (calc > 9) {
+                    checksum = checksum + 1;
+                    calc = calc - 10;
+                }
+
+                // Add the units element to the checksum total
+                checksum = checksum + calc;
+
+                // Switch the value of j
+                if (j === 1) {
+                    j = 2;
+                } else {
+                    j = 1;
+                }
+            }
+
+            //Check if it is divisible by 10 or not.
+            return (checksum % 10) === 0;
+        }
+
     </script>
 <?php require_once("../fragments/footer.php"); ?>

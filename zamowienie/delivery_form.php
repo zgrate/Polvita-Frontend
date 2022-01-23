@@ -47,8 +47,11 @@
     }
 
     function finalize() {
-        Cookies.set("delivery", JSON.stringify(window.choosen_delivery))
-        window.location.href = "payment_method.php"
+        Cookies.set("delivery_method", JSON.stringify(window.choosen_delivery))
+        if (window.choosen_delivery["prepaid"])
+            window.location.href = "summary.php"
+        else
+            window.location.href = "payment_method.php"
     }
 
     $(function () {

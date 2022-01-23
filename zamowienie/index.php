@@ -30,7 +30,9 @@
 
 
     <script type="application/javascript">
-
+        $("#errorModal").on("hidden.bs.modal", function () {
+            window.location.href = "../login.php"
+        })
 
         function refresh_basket(basket) {
             let sum = 0

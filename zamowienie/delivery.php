@@ -50,7 +50,7 @@
         Cookies.set("delivery", JSON.stringify({
             "name": $("#name").val(),
             "address": $("#address").val(),
-            "postal": $("#postal").val(),
+            "postal": $("#postalcode").val(),
             "city": $("#city").val()
         }))
         window.location.href = "delivery_form.php"
